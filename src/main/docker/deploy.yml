@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myhello
+  labels:
+    app: myhello
+spec:
+  selector:
+    matchLabels:
+      app: myhello
+  template:
+    metadata:
+      labels:
+        app: myhello
+    spec:
+      containers:
+        - name: myhello
+          image: localhost:32000/mynginx:registry
+
+          ports:
+            - containerPort: 8080

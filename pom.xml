@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>zortek.openclassroom</groupId>
     <artifactId>kotlinServer</artifactId>
@@ -14,25 +15,38 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <main.class>io.ktor.server.netty.EngineMain</main.class>
+        <docker.image.prefix>kotlinServer</docker.image.prefix>
     </properties>
     <repositories>
         <repository>
             <id>repo1</id>
             <url>https://jcenter.bintray.com</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>repo2</id>
             <url>https://kotlin.bintray.com/ktor</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>repo3</id>
             <url>https://kotlin.bintray.com/kotlin-js-wrappers</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
     <dependencies>
@@ -100,7 +114,7 @@
         <testSourceDirectory>${project.basedir}/test</testSourceDirectory>
         <resources>
             <resource>
-                <directory>${project.basedir}/resources</directory>
+                <directory>${project.basedir}/src/main/resources/</directory>
             </resource>
         </resources>
         <plugins>
@@ -110,7 +124,10 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration><source>1.8</source><target>1.8</target></configuration>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -119,14 +136,18 @@
                 <executions>
                     <execution>
                         <id>compile</id>
-                        <goals><goal>compile</goal></goals>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
                         <configuration>
                             <experimentalCoroutines>enable</experimentalCoroutines>
                         </configuration>
                     </execution>
                     <execution>
                         <id>test-compile</id>
-                        <goals><goal>test-compile</goal></goals>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
                         <configuration>
                             <experimentalCoroutines>enable</experimentalCoroutines>
                         </configuration>
@@ -154,7 +175,9 @@
                     <execution>
                         <id>make-assembly</id>
                         <phase>package</phase>
-                        <goals> <goal>single</goal> </goals>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
                         <configuration>
                             <archive>
                                 <manifest>
@@ -167,6 +190,58 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>myhellrun</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <copy
+                                        file="${project.build.directory}/${project.artifactId}-${project.version}.jar-with-dependencies.jar"
+                                        tofile="${project.build.directory}/app.jar"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.activation</groupId>
+                        <artifactId>activation</artifactId>
+                        <version>RELEASE</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <imageTags>${project.version}</imageTags>
+                    <imageTags>latest</imageTags>
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <main.resources>
+                        <resource>
+                            <directory>${project.build.directory}</directory>
+                            <include>app.jar</include>
+                            <targetPath>/</targetPath>
+                        </resource>
+                    </main.resources>
+                </configuration>
             </plugin>
         </plugins>
     </build>
